@@ -1,8 +1,8 @@
-name: Daily Commit
+name: Dynamic User Commit
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Runs every 5 minutes
+    - cron: '*/30 * * * *'  # Runs every 30 minutes
   workflow_dispatch:
 
 jobs:
@@ -11,18 +11,70 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Pull Latest Changes
-        run: git pull origin main  # Ensure you are pulling the latest changes from the main branch
-
-      - name: Fetch Random Users
-        id: fetch_users
+      - name: Set up Git
         run: |
-          users_json=$(curl -s 'https://randomuser.me/api/?results=30&nat=us')  # Fetch 30 random users
-          echo "$users_json" > users.json
+          git config --global user.name 'GitHub Actions Bot'
+          git config --global user.email 'actions@github.com'
 
-      - name: Parse and Commit for Users
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Fetch and Process Random Users
         run: |
-          # Parse the users data and loop through each user
-          users=$(jq -r '.results[] | "
+          pip install requests
+          
+          python << EOF
+          import requests
+          import json
+          import os
+          
+          # Fetch 30 random users from the API
+          response = requests.get('https://randomuser.me/api/?results=30&nat=us')
+          users_data = response.json()
+          
+          # Prepare a list to store user details
+          user_list = []
+          
+          # Process and extract user details
+          for user in users_data['results']:
+              email = user['email']
+              first_name = user['name']['first']
+              last_name = user['name']['last']
+              full_name = f"{first_name} {last_name}"
+              
+              # Create a user entry
+              user_entry = f"{email}:{full_name}"
+              user_list.append(user_entry)
+          
+          # Write users to a file
+          with open('random_users.txt', 'w') as f:
+              f.write('\n'.join(user_list))
+          
+          # Print out the users for workflow log
+          print("Generated Users:")
+          print('\n'.join(user_list))
+          EOF
+
+      - name: Commit Users
+        run: |
+          # Read the generated users file
+          mapfile -t users < random_users.txt
+
+          for user in "${users[@]}"; do
+            email="${user%%:*}"
+            name="${user##*:}"
+            
+            # Make the changes for the user
+            echo "Commit by $name at $(date '+%Y-%m-%d %H:%M:%S')" > "log_${name// /_}.txt"
+            
+            # Stage and commit the changes
+            git add "log_${name// /_}.txt"
+            git commit -m "Dynamic user commit by $name" || continue
+          done
+
+      - name: Push Changes
+        run: git push origin main
