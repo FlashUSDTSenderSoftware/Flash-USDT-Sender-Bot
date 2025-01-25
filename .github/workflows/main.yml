@@ -1,100 +1,28 @@
-name: Deploy Flash-USDT-Sender-Bot to GitHub Pages with SEO Injection
+name: Daily Commit
 
 on:
-  push:
-    branches:
-      - main # Trigger the workflow when changes are pushed to the main branch
-  pull_request:
-    branches:
-      - main # Trigger the workflow when a PR is created or updated for the main branch
+  schedule:
+    - cron: '*/5 * * * *'  # Runs every 5 minutes
+  workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  commit:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the repository
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v2
 
-    # Step 2: Set up Node.js (if your project requires building via Node.js)
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'
+      - name: Pull Latest Changes
+        run: git pull origin main  # Ensure you are pulling the latest changes from the main branch
 
-    # Step 3: Install dependencies (skip if your project doesn't need it)
-    - name: Install dependencies
-      run: |
-        npm install
+      - name: Fetch Random Users
+        id: fetch_users
+        run: |
+          users_json=$(curl -s 'https://randomuser.me/api/?results=30&nat=us')  # Fetch 30 random users
+          echo "$users_json" > users.json
 
-    # Step 4: Build the project (skip this step if your project is just static files)
-    - name: Build project
-      run: |
-        npm run build
-
-    # Step 5: Create SEO config (seo.json)
-    - name: Create SEO config
-      run: |
-        echo '{
-          "title": "Flash USDT Sender Bot",
-          "description": "A tool to send fake USDT for pranks.",
-          "keywords": "USDT, fake USDT, prank bot, crypto prank",
-          "author": "Flash-USDT-Sender",
-          "openGraph": {
-            "url": "https://flashusdtsendersoftware.github.io/Flash-USDT-Sender-Bot/",
-            "title": "Flash USDT Sender Bot",
-            "description": "A tool to send fake USDT for pranks.",
-            "image": "https://example.com/image.jpg",
-            "site_name": "Flash-USDT-Sender-Bot",
-            "type": "website",
-            "locale": "en_US"
-          },
-          "twitter": {
-            "image": "https://example.com/image.jpg",
-            "url": "https://flashusdtsendersoftware.github.io/Flash-USDT-Sender-Bot/",
-            "card": "summary_large_image",
-            "title": "Flash USDT Sender Bot",
-            "description": "A tool to send fake USDT for pranks."
-          },
-          "favicon": "https://example.com/favicon.ico",
-          "manifest": "https://example.com/manifest.json",
-          "icons": [
-            {
-              "src": "https://example.com/icon-192.png",
-              "sizes": "192x192",
-              "type": "image/png"
-            },
-            {
-              "src": "https://example.com/icon-512.png",
-              "sizes": "512x512",
-              "type": "image/png"
-            }
-          ]
-        }' > seo.json
-
-    # Step 6: Inject SEO meta tags into index.html
-    - name: Inject SEO meta tags into index.html
-      run: |
-        npx seo-injector --file index.html --config seo.json
-
-    # Step 7: Commit changes to the repository
-    - name: Commit SEO changes
-      run: |
-        git config --global user.name "github-actions"
-        git config --global user.email "github-actions@github.com"
-        git add index.html
-        git commit -m "Automated SEO meta tag injection"
-        git push
-
-    # Step 8: Deploy to GitHub Pages
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./build # Change this to your build directory if different
-
-    # Optional: Clean up, test or perform additional tasks
-    - name: Final checks (optional)
-      run: |
-        echo "Deploy and SEO Injection completed successfully!"
+      - name: Parse and Commit for Users
+        run: |
+          # Parse the users data and loop through each user
+          users=$(jq -r '.results[] | "
