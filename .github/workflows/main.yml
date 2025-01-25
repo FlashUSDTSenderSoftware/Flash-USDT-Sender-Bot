@@ -1,86 +1,60 @@
-name: Dynamic User Commit
+name: Daily Work
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Runs every hour
+    - cron: '*/5 * * * *'  # Runs every 5 minutes
   workflow_dispatch:
 
 jobs:
   commit:
-    runs-on: ubuntu-24.04  # Use Ubuntu 24.04 instead of ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v2
 
-      - name: Set up Git
+      - name: Make changes
         run: |
-          git config --global user.name 'GitHub Actions Bot'
-          git config --global user.email 'actions@github.com'
+          mkdir -p contributors
+          echo "Commit made at $(date '+%Y-%m-%d %H:%M:%S')" > contributors/log.txt
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
+      - name: Pull latest changes
+        run: git pull
 
-      - name: Fetch and Process Random Users
+      - name: Commit and Push for Random Users
         run: |
-          pip install requests
-          
-          python << EOF
-          import requests
-          import json
-          import os
-          
-          # Fetch 30 random users from the API
-          response = requests.get('https://randomuser.me/api/?results=30&nat=us')
-          users_data = response.json()
-          
-          # Prepare a list to store user details
-          user_list = []
-          
-          # Process and extract user details
-          for user in users_data['results']:
-              email = user['email']
-              first_name = user['name']['first']
-              last_name = user['name']['last']
-              full_name = f"{first_name} {last_name}"
-              username = user['login']['username']  # GitHub-like username
-              
-              # Create a user entry
-              user_entry = f"{email}:{full_name}:{username}"
-              user_list.append(user_entry)
-          
-          # Write users to a file
-          with open('random_users.txt', 'w') as f:
-              f.write('\n'.join(user_list))
-          
-          # Print out the users for workflow log
-          print("Generated Users:")
-          print('\n'.join(user_list))
-          EOF
+          # Function to generate a random email and username
+          generate_random_user() {
+            local random_username="user$(shuf -i 1000-9999 -n 1)"
+            local random_email="${random_username}@example.com"
+            echo "$random_email:$random_username"
+          }
 
-      - name: Commit Users
-        run: |
-          # Create commits/ directory if it doesn't exist
-          mkdir -p commits
-
-          # Read the generated users file
-          mapfile -t users < random_users.txt
-
-          for user in "${users[@]}"; do
+          # Generate random users and commit
+          for i in {1..10}; do
+            user=$(generate_random_user)
             email="${user%%:*}"
-            name="${user#*:}"
-            name="${name%%:*}"  # Extracting full name
-            username="${user##*:}"  # Extracting GitHub-like username
+            name="${user##*:}"
+            
+            echo "Processing random user: $name <$email>"
+            
+            # Set Git user details globally
+            git config --global user.email "$email"
+            git config --global user.name "$name"
             
             # Make the changes for the user
-            echo "Commit by $name (@$username) at $(date '+%Y-%m-%d %H:%M:%S')" > "commits/log_${username// /_}.txt"
+            log_file="contributors/log_${name// /_}.txt"
+            echo "Commit at $(date '+%Y-%m-%d %H:%M:%S')" > "$log_file"
             
             # Stage and commit the changes
-            git add "commits/log_${username// /_}.txt"
-            git commit -m "Dynamic user commit by $name (@$username)" || continue
+            git add "$log_file"
+            
+            # Commit if there are changes to commit
+            if git diff --cached --quiet; then
+              echo "No changes to commit for $name"
+            else
+              git commit -m "Daily update at $(date '+%Y-%m-%d %H:%M:%S')"
+              git push
+              echo "Changes pushed for $name"
+            fi
           done
-
-      - name: Push Changes
-        run: git push origin main
