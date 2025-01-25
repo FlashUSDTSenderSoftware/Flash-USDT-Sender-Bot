@@ -1,9 +1,13 @@
-name: Dynamic User Commit
+name: Flash User Live Tracker Exhibitor 🍑
 
 on:
   schedule:
     - cron: '*/30 * * * *'  # Runs every 30 minutes
   workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   commit:
@@ -22,6 +26,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+          cache: 'pip'
+
+      - name: Create Logs Directory
+        run: |
+          mkdir -p user_logs
+          chmod 755 user_logs
 
       - name: Fetch and Process Random Users
         run: |
@@ -31,6 +41,7 @@ jobs:
           import requests
           import json
           import os
+          from datetime import datetime
           
           # Fetch 30 random users from the API
           response = requests.get('https://randomuser.me/api/?results=30&nat=us')
@@ -44,14 +55,35 @@ jobs:
               email = user['email']
               first_name = user['name']['first']
               last_name = user['name']['last']
+              username = user['login']['username']
               full_name = f"{first_name} {last_name}"
+              timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
               
-              # Create a user entry
+              # Create detailed log content
+              log_content = f"""User Log Details
+Username: {username}
+Full Name: {full_name}
+Email: {email}
+Timestamp: {timestamp}
+
+Random User Generation Log
+-------------------------
+Generated during automated workflow run
+Processed at: {timestamp}
+"""
+              
+              # Write individual log file
+              log_filename = f"user_logs/log_{username}_{timestamp.replace(' ', '_').replace(':', '-')}.txt"
+              with open(log_filename, 'w') as log_file:
+                  log_file.write(log_content)
+              
+              # Create a user entry for tracking
               user_entry = f"{email}:{full_name}"
               user_list.append(user_entry)
           
-          # Write users to a file
-          with open('random_users.txt', 'w') as f:
+          # Write summary of users
+          with open('user_logs/user_summary.txt', 'w') as f:
+              f.write("Generated Users:\n")
               f.write('\n'.join(user_list))
           
           # Print out the users for workflow log
@@ -59,22 +91,57 @@ jobs:
           print('\n'.join(user_list))
           EOF
 
-      - name: Commit Users
+      - name: Check for Changes
+        id: check_changes
         run: |
-          # Read the generated users file
-          mapfile -t users < random_users.txt
+          changes=$(git status --porcelain user_logs/ | wc -l)
+          echo "changes_count=$changes" >> $GITHUB_OUTPUT
+          echo "Detected $changes changes in user_logs folder"
 
-          for user in "${users[@]}"; do
-            email="${user%%:*}"
-            name="${user##*:}"
-            
-            # Make the changes for the user
-            echo "Commit by $name at $(date '+%Y-%m-%d %H:%M:%S')" > "log_${name// /_}.txt"
-            
-            # Stage and commit the changes
-            git add "log_${name// /_}.txt"
-            git commit -m "Dynamic user commit by $name" || continue
+      - name: Commit and Push Changes
+        if: steps.check_changes.outputs.changes_count > 0
+        run: |
+          timestamp=$(date +"%Y%m%d-%H%M%S")
+          branch_name="user-logs-${timestamp}"
+          
+          git checkout -b $branch_name
+          git add user_logs/
+          
+          git commit -m "Dynamic user log generation: ${timestamp}" || echo "No changes to commit"
+          git push -u origin $branch_name
+
+      - name: Create Pull Request
+        if: steps.check_changes.outputs.changes_count > 0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --base main \
+            --title "User Logs Update: $(date +"%Y-%m-%d %H:%M:%S")" \
+            --body "Automated user log generation
+
+            - Generated detailed user logs
+            - Total new files: ${{ steps.check_changes.outputs.changes_count }}
+            - Timestamp: $(date +"%Y-%m-%d %H:%M:%S")"
+
+  cleanup:
+    needs: commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cleanup Old Branches
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Delete branches older than 7 days
+          gh pr list --state merged --json headRefName --jq '.[].headRefName' | \
+          while read -r branch; do
+            if [[ $branch == user-logs-* ]]; then
+              created_at=$(git log -1 --format=%cd --date=iso-strict origin/$branch)
+              days_old=$(( ($(date +%s) - $(date -d "$created_at" +%s)) / 86400 ))
+              
+              if [[ $days_old -gt 7 ]]; then
+                echo "Deleting branch $branch (${days_old} days old)"
+                git push origin --delete "$branch"
+              fi
+            fi
           done
-
-      - name: Push Changes
-        run: git push origin main
