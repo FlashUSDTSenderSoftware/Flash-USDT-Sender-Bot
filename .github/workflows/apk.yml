@@ -1,0 +1,69 @@
+name: Web to APK Automation
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to main branch
+  workflow_dispatch: # Allow manual runs
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the Repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js for Bubblewrap
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # Step 3: Install Bubblewrap
+      - name: Install Bubblewrap
+        run: npm install -g @bubblewrap/cli
+
+      # Step 4: Generate APK
+      - name: Build APK
+        run: |
+          bubblewrap init --manifest=https://flashusdtsender.xyz/manifest.json
+          bubblewrap build
+
+      # Step 5: Upload APK to Artifacts
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: FlashUSDT-Sender
+          path: ./app-release-signed.apk
+
+  release:
+    needs: build-apk
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout Code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Download APK Artifact
+      - name: Download APK Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: FlashUSDT-Sender
+
+      # Step 3: Create a GitHub Release
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: app-release-signed.apk
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: "v1.0.0" # Update version as needed
+          release_name: "FlashUSDT-Sender APK v1.0.0"
+          body: |
+            This is an auto-generated release of the FlashUSDT-Sender APK.
+            Changes included in this release:
+            - Generated using Bubblewrap.
+          draft: false
+          prerelease: false
