@@ -3,7 +3,7 @@ name: Web to APK Automation
 on:
   push:
     branches:
-      - main  # Trigger on push to main branch
+      - main  # Trigger on push to the main branch
   workflow_dispatch: # Allow manual runs
 
 jobs:
@@ -15,27 +15,38 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Node.js for Bubblewrap
+      # Step 2: Set up JDK 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # Step 3: Set up Node.js for Bubblewrap
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # Step 3: Install Bubblewrap
+      # Step 4: Install Bubblewrap CLI
       - name: Install Bubblewrap
         run: npm install -g @bubblewrap/cli
 
-      # Step 4: Generate APK
-      - name: Build APK
+      # Step 5: Initialize and Build APK with Bubblewrap
+      - name: Generate APK
         run: |
-          bubblewrap init --manifest=https://flashusdtsender.xyz/manifest.json
+          echo "Initializing Bubblewrap with manifest.json..."
+          bubblewrap init --manifest=https://flashusdtsendersoftware.vercel.app/manifest.json --directory=. --skipPwaValidation --overwrite
+          echo "Building APK..."
           bubblewrap build
+        env:
+          BROWSER: none  # Prevents interactive prompt issues
 
-      # Step 5: Upload APK to Artifacts
+      # Step 6: Upload APK Artifact
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: FlashUSDT-Sender
+          name: FlashUSDT-Sender-APK
           path: ./app-release-signed.apk
 
   release:
@@ -51,19 +62,19 @@ jobs:
       - name: Download APK Artifact
         uses: actions/download-artifact@v3
         with:
-          name: FlashUSDT-Sender
+          name: FlashUSDT-Sender-APK
 
       # Step 3: Create a GitHub Release
       - name: Create Release
-        uses: ncipollo/release-action@v1
+        uses: softprops/action-gh-release@v1
         with:
-          artifacts: app-release-signed.apk
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: "v1.0.0" # Update version as needed
-          release_name: "FlashUSDT-Sender APK v1.0.0"
+          files: app-release-signed.apk
+          tag_name: v1.0.0  # Update version as needed
+          name: "Flash USDT Sender APK v1.0.0"
           body: |
-            This is an auto-generated release of the FlashUSDT-Sender APK.
-            Changes included in this release:
-            - Generated using Bubblewrap.
+            This is the official auto-generated release of the Flash USDT Sender APK.
+            - Generated from https://flashusdtsendersoftware.vercel.app/.
+            - Built with Bubblewrap.
+            - Version: v1.0.0
           draft: false
           prerelease: false
