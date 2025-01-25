@@ -1,39 +1,9 @@
-funding:
-  github:
-    - likhonsheikhcodes
-    - RecentCoder
-    - Rekt-Developer
-    - scripters-store
-  ko_fi: https://buymeacoffee.com/flashusdtsendersoftware
-  thanks_dev: gh/rekt-developer
-  custom: flashusdtsendersoftware
-
-funding_goods:
-  - title: "GitHub Sponsors"
-    description: "Support the project on GitHub Sponsors. Contributions directly help with development and infrastructure."
-    platform: github
-    benefits:
-      - "Exclusive project updates"
-      - "Early access to new features"
-      - "Priority support"
-
-  - title: "Buy Me A Coffee"
-    description: "Support the project with a small donation on Buy Me A Coffee."
-    platform: ko_fi
-    benefits:
-      - "Thank you shoutout"
-      - "Access to donor-only content"
-
-  - title: "Thanks.dev"
-    description: "Contribute via Thanks.dev to help improve the project."
-    platform: thanks_dev
-    benefits:
-      - "Recognition on the project page"
-      - "Thank you message"
-
-  - title: "Custom FlashUSDT Support"
-    description: "Support the project directly via the FlashUSDT platform."
-    platform: custom
-    benefits:
-      - "Special mentions in project updates"
-      - "Direct communication with the development team"
+github:
+  - likhonsheikhcodes
+  - RecentCoder
+  - Rekt-Developer
+  - scripters-store
+ko_fi: https://buymeacoffee.com/flashusdtsendersoftware
+custom:
+  - url: https://flashusdtsender.xyz/
+    description: "Support the FlashUSDT Sender project through our official website."
