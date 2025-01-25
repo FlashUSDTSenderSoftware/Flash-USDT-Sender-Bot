@@ -7,23 +7,24 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="robots" content="index, follow">
     <meta name="author" content="Likhon Sheikh">
-    <meta name="description" content="Flash USDT Sender - The ultimate blockchain simulation platform for testing, education, and secure multi-network transactions.">
+    <meta name="description" content="Flash USDT Sender - The ultimate blockchain platform for testing, education, and secure multi-network transactions.">
     <meta name="keywords" content="Flash USDT, Blockchain, USDT Sender, Cryptocurrency, Educational Tool, Secure Testing, Multi-Network">
-    <meta property="og:title" content="Flash USDT Sender - Ultimate Blockchain Simulation Platform">
-    <meta property="og:description" content="Comprehensive blockchain simulation, secure testing, and professional learning platform for cryptocurrency transactions.">
+    <meta property="og:title" content="Flash USDT Sender - Ultimate Blockchain Platform">
+    <meta property="og:description" content="Comprehensive blockchain platform, secure testing, and professional learning for cryptocurrency transactions.">
     <meta property="og:image" content="https://raw.githubusercontent.com/FlashUSDTSenderSoftware/FlashUSDTSenderSoftware.github.io/refs/heads/main/Copy%20of%20Green%20Modern%20Futuristic%20Artificial%20Intelligence%20Presentation.jpeg">
     <meta property="og:url" content="https://flashusdtsender.xyz">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Flash USDT Sender - Ultimate Blockchain Simulation Platform">
-    <meta name="twitter:description" content="Comprehensive blockchain simulation, secure testing, and professional learning platform for cryptocurrency transactions.">
+    <meta name="twitter:title" content="Flash USDT Sender - Ultimate Blockchain Platform">
+    <meta name="twitter:description" content="Comprehensive blockchain platform, secure testing, and professional learning for cryptocurrency transactions.">
     <meta name="twitter:image" content="https://raw.githubusercontent.com/FlashUSDTSenderSoftware/FlashUSDTSenderSoftware.github.io/refs/heads/main/Copy%20of%20Green%20Modern%20Futuristic%20Artificial%20Intelligence%20Presentation.jpeg">
 
-    <title>Flash USDT Sender - Ultimate Blockchain Simulation Platform</title>
+    <title>Flash USDT Sender - Ultimate Blockchain Platform</title>
 
     <!-- CDN and External Libraries for Performance -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
 
     <style>
         :root {
@@ -38,7 +39,7 @@
             color: var(--text-primary);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             overflow-x: hidden;
-            background: 
+            background:
                 linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)),
                 url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTsZM1Wl3FBUpZe88CwylVtnh5XJ8OaTqZYN9yMZZesmgA9Q5cGEk7UFTaF&s=10');
             background-size: cover;
@@ -64,6 +65,53 @@
                 height: 300px;
             }
         }
+
+        .help-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #6a11cb;
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .help-button:hover {
+            transform: scale(1.1);
+        }
+
+        .help-popup {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background-color: var(--dark-card);
+            color: var(--text-primary);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .help-popup.show {
+            display: block;
+        }
+
+        .help-popup a {
+            color: #2575fc;
+            text-decoration: none;
+        }
+
+        .help-popup a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -71,12 +119,12 @@
     <!-- Header -->
     <header class="bg-opacity-50 glass-card p-6 text-center">
         <div class="container mx-auto">
-            <img src="https://raw.githubusercontent.com/FlashUSDTSenderSoftware/FlashUSDTSenderSoftware.github.io/refs/heads/main/Copy%20of%20Green%20Modern%20Futuristic%20Artificial%20Intelligence%20Presentation.jpeg" 
-                 alt="Flash USDT Sender Banner" 
+            <img src="https://raw.githubusercontent.com/FlashUSDTSenderSoftware/FlashUSDTSenderSoftware.github.io/refs/heads/main/Copy%20of%20Green%20Modern%20Futuristic%20Artificial%20Intelligence%20Presentation.jpeg"
+                 alt="Flash USDT Sender Banner"
                  class="mx-auto mb-6 rounded-xl shadow-2xl max-w-full h-64 object-cover hover-scale">
-            
+
             <h1 class="text-4xl font-bold mb-4 text-white">🚀 Flash USDT Sender</h1>
-            <p class="text-xl opacity-80">Ultimate Blockchain Simulation Platform</p>
+            <p class="text-xl opacity-80">Ultimate Blockchain Platform</p>
         </div>
     </header>
 
@@ -88,20 +136,20 @@
                 <h3 class="text-2xl mb-4 text-white">
                     <i class="fab fa-youtube text-red-500 mr-2"></i>Tutorial Video
                 </h3>
-                <iframe 
-                    src="https://www.youtube.com/embed/b0JFTHluBEE" 
+                <iframe
+                    src="https://www.youtube.com/embed/b0JFTHluBEE"
                     class="w-full h-64 rounded-xl"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen>
                 </iframe>
             </div>
-            
+
             <div data-aos="fade-left" class="glass-card p-6 rounded-xl">
                 <h3 class="text-2xl mb-4 text-white">
                     <i class="fab fa-telegram text-blue-500 mr-2"></i>Telegram Post
                 </h3>
-                <iframe 
-                    src="https://t.me/ScriptersShop/191" 
+                <iframe
+                    src="https://t.me/ScriptersShop/191"
                     class="w-full h-64 rounded-xl">
                 </iframe>
             </div>
@@ -112,15 +160,15 @@
             <div data-aos="zoom-in" class="glass-card p-6 rounded-xl text-center hover-scale">
                 <i class="fas fa-globe text-4xl text-blue-400 mb-4"></i>
                 <h3 class="text-xl font-bold mb-2">Multi-Network</h3>
-                <p>Comprehensive Blockchain Simulation</p>
+                <p>Comprehensive Blockchain Solutions</p>
             </div>
-            
+
             <div data-aos="zoom-in" class="glass-card p-6 rounded-xl text-center hover-scale">
                 <i class="fas fa-lock text-4xl text-green-400 mb-4"></i>
                 <h3 class="text-xl font-bold mb-2">Secure Testing</h3>
                 <p>Advanced Encryption Protocols</p>
             </div>
-            
+
             <div data-aos="zoom-in" class="glass-card p-6 rounded-xl text-center hover-scale">
                 <i class="fas fa-chart-line text-4xl text-purple-400 mb-4"></i>
                 <h3 class="text-xl font-bold mb-2">Educational Tool</h3>
@@ -130,11 +178,11 @@
 
         <!-- CTA Buttons -->
         <div class="text-center mt-12 space-x-4">
-            <a href="https://tinyurl.com/GetAccessKeysNow" 
+            <a href="https://tinyurl.com/GetAccessKeysNow"
                class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 hover-scale">
                 <i class="fas fa-key mr-2"></i>Get Beta Access
             </a>
-            <a href="https://flashusdtsender.xyz" 
+            <a href="https://flashusdtsender.xyz"
                class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 hover-scale">
                 <i class="fas fa-external-link-alt mr-2"></i>Official Portal
             </a>
@@ -147,7 +195,7 @@
             <p class="mb-4 text-sm">
                 <i class="fas fa-shield-alt mr-2"></i>Educational Purpose | Regulatory Compliance
             </p>
-            
+
             <div class="flex justify-center space-x-6 mb-6">
                 <a href="https://youtube.com/shorts/b0JFTHluBEE" class="text-white hover:text-red-500 transition">
                     <i class="fab fa-youtube text-2xl"></i>
@@ -174,6 +222,15 @@
         </div>
     </footer>
 
+    <!-- Help Button and Popup -->
+    <div class="help-button" onclick="toggleHelpPopup()">
+        <i class="fas fa-question"></i>
+    </div>
+    <div class="help-popup" id="helpPopup">
+        <p>Need help?</p>
+        <a href="https://t.me/fariasultanacodes" target="_blank">Contact Support</a>
+    </div>
+
     <!-- External Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>
@@ -181,6 +238,10 @@
             duration: 1200,
             once: true
         });
+
+        function toggleHelpPopup() {
+            document.getElementById('helpPopup').classList.toggle('show');
+        }
     </script>
 </body>
 
