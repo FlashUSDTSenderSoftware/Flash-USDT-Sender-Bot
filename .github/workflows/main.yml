@@ -1,8 +1,8 @@
-name: Daily Work
+name: Weekly Work
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Runs every 5 minutes
+    - cron: '0 0 * * 0'  # Runs at 00:00 (midnight) every Sunday
   workflow_dispatch:
 
 jobs:
@@ -21,22 +21,102 @@ jobs:
       - name: Pull latest changes
         run: git pull
 
-      - name: Commit and Push for Random Users
+      - name: Commit and Push for Multiple Users
         run: |
-          # Function to generate a random email and username
-          generate_random_user() {
-            local random_username="user$(shuf -i 1000-9999 -n 1)"
-            local random_email="${random_username}@example.com"
-            echo "$random_email:$random_username"
-          }
+          # List of users (random emails and names)
+          users=(
+            "randomuser01@example.com:Random User 1"
+            "user42@example.com:John Doe"
+            "user1234@example.com:Jane Smith"
+            "alice.jones@randommail.com:Alice Jones"
+            "bob.brown@mailservice.com:Bob Brown"
+            "mary.green@domain.com:Mary Green"
+            "steve.white@randomemail.com:Steve White"
+            "linda.black@domain.com:Linda Black"
+            "james.smith@service.com:James Smith"
+            "lucy.williams@randommail.com:Lucy Williams"
+            "paul.martin@domain.com:Paul Martin"
+            "emily.evans@mailservice.com:Emily Evans"
+            "oliver.lee@randommail.com:Oliver Lee"
+            "ella.king@randomemail.com:Ella King"
+            "michael.morris@domain.com:Michael Morris"
+            "isabella.clark@service.com:Isabella Clark"
+            "jack.miller@domain.com:Jack Miller"
+            "sophia.roberts@randomemail.com:Sophia Roberts"
+            "william.jones@randommail.com:William Jones"
+            "mia.harris@domain.com:Mia Harris"
+            "ryan.davis@service.com:Ryan Davis"
+            "olivia.perez@randommail.com:Olivia Perez"
+            "henry.martinez@domain.com:Henry Martinez"
+            "ava.walker@randomemail.com:Ava Walker"
+            "benjamin.thomas@mailservice.com:Benjamin Thomas"
+            "chloe.young@randommail.com:Chloe Young"
+            "ethan.johnson@domain.com:Ethan Johnson"
+            "mason.moore@service.com:Mason Moore"
+            "lily.johnson@randomemail.com:Lily Johnson"
+            "grace.taylor@domain.com:Grace Taylor"
+            "nathan.jones@mailservice.com:Nathan Jones"
+            "zoe.scott@randommail.com:Zoe Scott"
+            "logan.martin@domain.com:Logan Martin"
+            "charlotte.patterson@service.com:Charlotte Patterson"
+            "jackson.davis@randommail.com:Jackson Davis"
+            "harry.white@randomemail.com:Harry White"
+            "amelia.wilson@domain.com:Amelia Wilson"
+            "samuel.martin@service.com:Samuel Martin"
+            "lucas.martinez@randomemail.com:Lucas Martinez"
+            "scarlett.adams@randommail.com:Scarlett Adams"
+            "henry.roberts@domain.com:Henry Roberts"
+            "bella.martin@service.com:Bella Martin"
+            "daniel.smith@randommail.com:Daniel Smith"
+            "ella.brown@domain.com:Ella Brown"
+            "jake.davis@randomemail.com:Jake Davis"
+            "sofia.martin@service.com:Sofia Martin"
+            "matthew.lee@randommail.com:Matthew Lee"
+            "hannah.smith@domain.com:Hannah Smith"
+            "william.hughes@randomemail.com:William Hughes"
+            "charlie.king@service.com:Charlie King"
+            "lucas.williams@domain.com:Lucas Williams"
+            "madison.brown@randommail.com:Madison Brown"
+            "george.hall@randomemail.com:George Hall"
+            "chloe.davis@service.com:Chloe Davis"
+            "natalie.johnson@domain.com:Natalie Johnson"
+            "logan.wilson@randommail.com:Logan Wilson"
+            "olivia.lee@randomemail.com:Olivia Lee"
+            "nathan.brown@domain.com:Nathan Brown"
+            "lily.miller@randommail.com:Lily Miller"
+            "lucy.adams@service.com:Lucy Adams"
+            "ethan.brown@randommail.com:Ethan Brown"
+            "ava.davis@domain.com:Ava Davis"
+            "lucas.wilson@randomemail.com:Lucas Wilson"
+            "james.harris@service.com:James Harris"
+            "benjamin.johnson@randommail.com:Benjamin Johnson"
+            "zoe.martin@domain.com:Zoe Martin"
+            "henry.brown@service.com:Henry Brown"
+            "sophia.white@randommail.com:Sophia White"
+            "jake.king@domain.com:Jake King"
+            "ella.smith@randomemail.com:Ella Smith"
+            "nathan.morris@service.com:Nathan Morris"
+            "jackson.harris@randommail.com:Jackson Harris"
+            "grace.brown@domain.com:Grace Brown"
+            "william.martinez@randomemail.com:William Martinez"
+            "lily.lee@randommail.com:Lily Lee"
+            "amanda.jones@domain.com:Amanda Jones"
+            "logan.adams@randomemail.com:Logan Adams"
+            "scarlett.smith@service.com:Scarlett Smith"
+            "zoe.martin@domain.com:Zoe Martin"
+            "mason.king@randommail.com:Mason King"
+            "benjamin.smith@domain.com:Benjamin Smith"
+            "zoe.harris@randomemail.com:Zoe Harris"
+            "lucas.miller@service.com:Lucas Miller"
+            "charlotte.martin@domain.com:Charlotte Martin"
+          )
 
-          # Generate random users and commit
-          for i in {1..10}; do
-            user=$(generate_random_user)
+
+          for user in "${users[@]}"; do
             email="${user%%:*}"
             name="${user##*:}"
             
-            echo "Processing random user: $name <$email>"
+            echo "Processing user: $name <$email>"
             
             # Set Git user details globally
             git config --global user.email "$email"
@@ -53,7 +133,7 @@ jobs:
             if git diff --cached --quiet; then
               echo "No changes to commit for $name"
             else
-              git commit -m "Daily update at $(date '+%Y-%m-%d %H:%M:%S')"
+              git commit -m "Weekly update at $(date '+%Y-%m-%d %H:%M:%S')"
               git push
               echo "Changes pushed for $name"
             fi
