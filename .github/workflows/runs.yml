@@ -2,7 +2,7 @@ name: Daily Work
 
 on:
   schedule:
-    - cron: '*/55 * * * *'  # Runs every 5 minutes
+    - cron: '*/60 * * * *'  # Runs every 5 minutes
   workflow_dispatch:
 
 jobs:
