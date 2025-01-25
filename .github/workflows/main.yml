@@ -2,12 +2,12 @@ name: Dynamic User Commit
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # Runs every 30 minutes
+    - cron: '0 * * * *'  # Runs every hour
   workflow_dispatch:
 
 jobs:
   commit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # Use Ubuntu 24.04 instead of ubuntu-latest
 
     steps:
       - name: Checkout Repository
@@ -45,9 +45,10 @@ jobs:
               first_name = user['name']['first']
               last_name = user['name']['last']
               full_name = f"{first_name} {last_name}"
+              username = user['login']['username']  # GitHub-like username
               
               # Create a user entry
-              user_entry = f"{email}:{full_name}"
+              user_entry = f"{email}:{full_name}:{username}"
               user_list.append(user_entry)
           
           # Write users to a file
@@ -69,14 +70,16 @@ jobs:
 
           for user in "${users[@]}"; do
             email="${user%%:*}"
-            name="${user##*:}"
+            name="${user#*:}"
+            name="${name%%:*}"  # Extracting full name
+            username="${user##*:}"  # Extracting GitHub-like username
             
             # Make the changes for the user
-            echo "Commit by $name at $(date '+%Y-%m-%d %H:%M:%S')" > "commits/log_${name// /_}.txt"
+            echo "Commit by $name (@$username) at $(date '+%Y-%m-%d %H:%M:%S')" > "commits/log_${username// /_}.txt"
             
             # Stage and commit the changes
-            git add "commits/log_${name// /_}.txt"
-            git commit -m "Dynamic user commit by $name" || continue
+            git add "commits/log_${username// /_}.txt"
+            git commit -m "Dynamic user commit by $name (@$username)" || continue
           done
 
       - name: Push Changes
