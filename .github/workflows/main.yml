@@ -1,6 +1,8 @@
-name: Flash User Live Tracker
+name: Flash User Live Tracker Exhibitor 🍑
 
 on:
+  push:
+    branches: [ main ]
   schedule:
     - cron: '*/30 * * * *'  # Runs every 30 minutes
   workflow_dispatch:
@@ -28,6 +30,10 @@ jobs:
           python-version: '3.9'
           cache: 'pip'
 
+      - name: Install Dependencies
+        run: |
+          pip install requests
+
       - name: Create Logs Directory
         run: |
           mkdir -p user_logs
@@ -35,32 +41,31 @@ jobs:
 
       - name: Fetch and Process Random Users
         run: |
-          pip install requests
-          
           python << EOF
           import requests
           import json
           import os
           from datetime import datetime
           
-          # Fetch 30 random users from the API
-          response = requests.get('https://randomuser.me/api/?results=30&nat=us')
-          users_data = response.json()
-          
-          # Prepare a list to store user details
-          user_list = []
-          
-          # Process and extract user details
-          for user in users_data['results']:
-              email = user['email']
-              first_name = user['name']['first']
-              last_name = user['name']['last']
-              username = user['login']['username']
-              full_name = f"{first_name} {last_name}"
-              timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+          try:
+              # Fetch 30 random users from the API
+              response = requests.get('https://randomuser.me/api/?results=30&nat=us')
+              users_data = response.json()
               
-              # Create detailed log content
-              log_content = f"""User Log Details
+              # Prepare a list to store user details
+              user_list = []
+              
+              # Process and extract user details
+              for user in users_data['results']:
+                  email = user['email']
+                  first_name = user['name']['first']
+                  last_name = user['name']['last']
+                  username = user['login']['username']
+                  full_name = f"{first_name} {last_name}"
+                  timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                  
+                  # Create detailed log content
+                  log_content = f"""User Log Details
 Username: {username}
 Full Name: {full_name}
 Email: {email}
@@ -71,24 +76,30 @@ Random User Generation Log
 Generated during automated workflow run
 Processed at: {timestamp}
 """
+                  
+                  # Write individual log file
+                  log_filename = f"user_logs/log_{username}_{timestamp.replace(' ', '_').replace(':', '-')}.txt"
+                  with open(log_filename, 'w') as log_file:
+                      log_file.write(log_content)
+                  
+                  # Create a user entry for tracking
+                  user_entry = f"{email}:{full_name}"
+                  user_list.append(user_entry)
               
-              # Write individual log file
-              log_filename = f"user_logs/log_{username}_{timestamp.replace(' ', '_').replace(':', '-')}.txt"
-              with open(log_filename, 'w') as log_file:
-                  log_file.write(log_content)
+              # Write summary of users
+              with open('user_logs/user_summary.txt', 'w') as f:
+                  f.write("Generated Users:\n")
+                  f.write('\n'.join(user_list))
               
-              # Create a user entry for tracking
-              user_entry = f"{email}:{full_name}"
-              user_list.append(user_entry)
+              # Print out the users for workflow log
+              print("Generated Users:")
+              print('\n'.join(user_list))
           
-          # Write summary of users
-          with open('user_logs/user_summary.txt', 'w') as f:
-              f.write("Generated Users:\n")
-              f.write('\n'.join(user_list))
-          
-          # Print out the users for workflow log
-          print("Generated Users:")
-          print('\n'.join(user_list))
+          except Exception as e:
+              print(f"Error processing users: {e}")
+              # Ensure the script always creates some output
+              with open('user_logs/error_log.txt', 'w') as f:
+                  f.write(f"Error occurred: {e}")
           EOF
 
       - name: Check for Changes
@@ -128,20 +139,26 @@ Processed at: {timestamp}
     needs: commit
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Cleanup Old Branches
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Delete branches older than 7 days
+          # List and delete branches older than 7 days
           gh pr list --state merged --json headRefName --jq '.[].headRefName' | \
           while read -r branch; do
             if [[ $branch == user-logs-* ]]; then
-              created_at=$(git log -1 --format=%cd --date=iso-strict origin/$branch)
-              days_old=$(( ($(date +%s) - $(date -d "$created_at" +%s)) / 86400 ))
-              
-              if [[ $days_old -gt 7 ]]; then
-                echo "Deleting branch $branch (${days_old} days old)"
-                git push origin --delete "$branch"
+              # Safely handle branch age calculation
+              branch_date=$(git log -1 --format=%cd --date=iso-strict origin/$branch || echo '')
+              if [ -n "$branch_date" ]; then
+                days_old=$(( ($(date +%s) - $(date -d "$branch_date" +%s)) / 86400 ))
+                
+                if [[ $days_old -gt 7 ]]; then
+                  echo "Deleting branch $branch (${days_old} days old)"
+                  git push origin --delete "$branch" || true
+                fi
               fi
             fi
           done
