@@ -25,7 +25,7 @@ jobs:
         run: |
           # List of users
           users=(
-            "huangsunchuangyu@outlook.com:rNLKJA"
+            "honeysharma1444@gmail.com:Honey7"
             "ibbles@hotmail.com:Martin Nilsson"
             "park.heekang33@gmail.com:Heekang Park"
             "zhiweik@gmail.com:Chen Zhiwei"
